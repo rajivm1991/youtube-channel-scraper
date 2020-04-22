@@ -3,25 +3,23 @@
     "type": "object",
     "schemaVersion": 1,
     "properties": {
-        "maxResults": {
-            "title": "Maximum videos",
-            "type": "integer",
-            "description": "Limit number of videos to crawl; <br />for 'No limits' empty the field",
-            "minimum": 1,
-            "maximum": 999,
-            "default": 50,
-            "unit": "Videos",
-            "nullable": true
-        },
         "startUrl": {
             "title": "Start URL",
             "type": "string",
-            "description": "Youtube URL to start with",
-            "prefill": "https://www.youtube.com/",
-            "default": "https://www.youtube.com/",
+            "description": "Youtube Channel URL - Videos Tab - Uploads Section",
+            "prefill": "https://www.youtube.com/user/Maroon5/videos?view=0&sort=dd&shelf_id=0",
             "editor": "textfield",
-            "nullable": false,
-            "sectionCaption": "Advanced options"
+            "nullable": false
+        },
+        "maxResults": {
+            "title": "Maximum videos",
+            "type": "integer",
+            "description": "Limit number of videos to crawl; <br />maximum: 999",
+            "minimum": 1,
+            "maximum": 999,
+            "default": 10,
+            "unit": "Videos",
+            "nullable": true
         },
         "proxyConfiguration": {
             "title": "Proxy configuration",
@@ -30,7 +28,8 @@
             "description": "The best option is usually Automatic proxy. But you can also use your own proxies or no proxy",
             "prefill": {
                 "useApifyProxy": true
-            }
+            },
+            "sectionCaption": "Advanced options"
         },
         "verboseLog": {
             "title": "Verbose log",

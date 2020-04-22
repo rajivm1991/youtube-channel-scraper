@@ -46,8 +46,8 @@ exports.handleMaster = async (page, requestQueue, input) => {
         videoIndex = maxInQueue;
         maxInQueue = queuedVideos.length;
     } while (videosPending && !userRequestFilled);
-
     log.info('infinite scroll done...');
+    log.info(`queuedVideos = ${queuedVideos.length}`);
 };
 
 exports.handleDetail = async (page, request) => {
