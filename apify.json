@@ -1,0 +1,11 @@
+{
+	"name": "youtube-channel-scraper",
+	"version": "0.0",
+	"buildTag": "latest",
+	"env": {
+		"userId": "@myuserid",
+		"apifyToken": "@mytoken",
+		"proxyPswd": "@proxyPswd"
+	},
+	"template": "puppeteer_crawler"
+}
