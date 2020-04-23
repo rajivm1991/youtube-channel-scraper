@@ -100,13 +100,13 @@ exports.handleDetail = async (page, request) => {
         id: videoId,
         url: request.url,
         viewCount,
-        date: uploadDate,
+        date: uploadDate === 'Invalid date' ? uploadDateStr : uploadDate,
         likes: likesCount,
         dislikes: dislikesCount,
         channelName,
         channelUrl,
         numberOfSubscribers,
-        details: description,
+        details: description
     });
 };
 

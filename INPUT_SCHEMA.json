@@ -3,12 +3,14 @@
     "type": "object",
     "schemaVersion": 1,
     "properties": {
-        "startUrl": {
-            "title": "Start URL",
-            "type": "string",
-            "description": "Youtube Channel URL - Videos Tab - Uploads Section",
-            "prefill": "https://www.youtube.com/user/Maroon5/videos?view=0&sort=dd&shelf_id=0",
-            "editor": "textfield",
+        "channelUrls": {
+            "title": "Youtube Channel - Video Tab Link",
+            "type": "array",
+            "description": "Provide only Youtube Channel's Video Tab Link",
+            "editor": "stringList",
+            "placeholderValue": "URL",
+            "patternValue": "https:\\/\\/www\\.youtube\\.com\\/(?'uname'.+)\\/videos.+",
+            "uniqueItems": true,
             "nullable": false
         },
         "maxResults": {
@@ -39,6 +41,6 @@
         }
     },
     "required": [
-        "startUrl"
+        "channelUrls"
     ]
 }
