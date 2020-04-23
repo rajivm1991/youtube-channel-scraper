@@ -1,0 +1,42 @@
+{
+    "name": "youtube-channel-scraper",
+    "version": "0.0.1",
+    "description": "Actor to scrape youtube channel videos",
+    "keywords": [
+        "apify",
+        "apifier",
+        "crawler",
+        "search",
+        "youtube",
+        "pupetteer"
+    ],
+    "dependencies": {
+        "apify": "^0.20.3",
+        "moment": "^2.24.0"
+    },
+    "devDependencies": {
+        "@apify/eslint-config": "0.0.3",
+        "@types/puppeteer": "^1.20.2",
+        "chai": "^4.2.0",
+        "eslint": "^6.5.1",
+        "mocha": "^6.2.2",
+        "sinon": "^7.5.0"
+    },
+    "scripts": {
+        "start": "node src/main.js",
+        "test": "mocha test/utility_spec.js"
+    },
+    "author": "rajiv.m1991@gmail.com",
+    "contributors": [
+        "Rajiv <rajiv.m1991@gmail.com>"
+    ],
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/rajivm1991/youtube-channel-scraper",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rajivm1991/youtube-channel-scraper"
+    },
+    "bugs": {
+        "url": "https://github.com/rajivm1991/youtube-channel-scraper/issues"
+    }
+}
