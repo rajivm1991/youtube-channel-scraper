@@ -9,7 +9,7 @@
             "description": "Provide only Youtube Channel's Video Tab Link",
             "editor": "stringList",
             "placeholderValue": "URL",
-            "patternValue": "https:\\/\\/www\\.youtube\\.com\\/(?<uname>.+)\\/videos.+",
+            "patternValue": "https:\\/\\/www\\.youtube\\.com\\/(?<uname>.+)\\/videos.*",
             "uniqueItems": true,
             "nullable": false
         },
