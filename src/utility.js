@@ -5,7 +5,7 @@ const { log } = Apify.utils;
 
 const CONSTS = require('./consts');
 
-exports.loadVideosUrls = async (requestQueue, page, youtubeVideosXp, urlXp, maxRequested, videoIndx, maxInQueue) => {
+exports.loadVideosUrls = async (requestQueue, page, inputUrl, youtubeVideosXp, urlXp, maxRequested, videoIndx, maxInQueue) => {
     let userRequestFilled = videoIndx >= maxRequested;
     let queueLimitReached = videoIndx >= maxInQueue;
 
@@ -22,7 +22,7 @@ exports.loadVideosUrls = async (requestQueue, page, youtubeVideosXp, urlXp, maxR
 
         const urls = await videos[0].$x(urlXp);
         const url = await page.evaluate(el => el.href, urls[0]);
-        await requestQueue.addRequest({ url, userData: { label: 'DETAIL' } });
+        await requestQueue.addRequest({ url, userData: { label: 'DETAIL', inputUrl: inputUrl} });
 
         videoIndx++;
 

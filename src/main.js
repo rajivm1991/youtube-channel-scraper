@@ -9,10 +9,9 @@ Apify.main(async () => {
   const input = await Apify.getInput();
   // const input = {
   //   "channelUrls": [
-  //     "https://www.youtube.com/channel/UC1L2JoMpcY6MRLhFd3gg5Xg/videos?view=2&flow=grid&live_view=502",
-  //     "https://www.youtube.com/channel/UCuWuAvEnKWez5BUr29VpwqA/videos?view=2&flow=grid&live_view=502"
+  //     "https://www.youtube.com/arcticphilharmonic/videos?view=2&flow=grid&live_view=500"
   //   ],
-  //   "maxResults": 5,
+  //   "maxResults": 1,
   //   "proxyConfiguration": {
   //     "useApifyProxy": false
   //   },
@@ -57,7 +56,7 @@ Apify.main(async () => {
 
     switch (request.userData.label) {
       case 'MASTER': {
-        await crawler.handleMaster(page, requestQueue, input);
+        await crawler.handleMaster(page, request, requestQueue, input);
         break;
       }
       case 'DETAIL': {

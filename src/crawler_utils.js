@@ -6,7 +6,10 @@ const { log, sleep, puppeteer } = Apify.utils;
 const utils = require('./utility');
 const CONSTS = require('./consts');
 
-exports.handleMaster = async (page, requestQueue, input) => {
+exports.handleMaster = async (page, request, requestQueue, input) => {
+    log.info(`handling master url ${request.url}`);
+    const inputUrl = request.url;
+
     log.debug('waiting for first video to load...');
     const { youtubeVideosXp, urlXp } = CONSTS.SELECTORS.SEARCH;
     await page.waitForXPath(youtubeVideosXp, { visible: true });
@@ -33,7 +36,7 @@ exports.handleMaster = async (page, requestQueue, input) => {
     let videosPending = maxInQueue < queuedVideos.length;
     maxInQueue = queuedVideos.length;
     do {
-        userRequestFilled = await utils.loadVideosUrls(requestQueue, page, youtubeVideosXp, urlXp, maxRequested, videoIndex, maxInQueue);
+        userRequestFilled = await utils.loadVideosUrls(requestQueue, page, inputUrl, youtubeVideosXp, urlXp, maxRequested, videoIndex, maxInQueue);
 
         // wait for more videos to *start* loading
         await sleep(CONSTS.DELAY.START_LOADING_MORE_VIDEOS);
@@ -51,6 +54,8 @@ exports.handleMaster = async (page, requestQueue, input) => {
 };
 
 exports.handleDetail = async (page, request) => {
+    const inputUrl = request.userData.inputUrl;
+
     const { titleXp, viewCountXp, uploadDateXp, likesXp, dislikesXp, channelXp, subscribersXp, descriptionXp } = CONSTS.SELECTORS.VIDEO;
 
     log.info(`handling detail url ${request.url}`);
@@ -105,6 +110,7 @@ exports.handleDetail = async (page, request) => {
         dislikes: dislikesCount,
         channelName,
         channelUrl,
+        inputUrl,
         numberOfSubscribers,
         details: description
     });
