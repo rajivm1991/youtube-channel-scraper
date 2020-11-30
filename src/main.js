@@ -7,6 +7,16 @@ const { log } = Apify.utils;
 
 Apify.main(async () => {
     const input = await Apify.getInput();
+    // const input = {
+    //   maxResults: 1,
+    //   verboseLog: true,
+    //   startUrls: [
+    //     "https://www.youtube.com/c/BraxMe",
+    //   ],
+    //   proxyConfiguration: {
+    //     useApifyProxy: false,
+    //   }
+    // };
 
     const { verboseLog, startUrls = [] } = input;
     if (verboseLog) {
@@ -84,6 +94,7 @@ Apify.main(async () => {
                 url: req.url,
                 userData: {
                     label,
+                    inputUrl: req.url
                 },
             });
         }

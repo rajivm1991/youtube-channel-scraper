@@ -16,7 +16,7 @@ const { handleErrorAndScreenshot } = require('./utility');
  */
 exports.handleMaster = async (page, requestQueue, input, request) => {
     const { searchBox, toggleFilterMenu, filterBtnsXp } = CONSTS.SELECTORS.SEARCH;
-    const { search, label } = request.userData;
+    const { search, label, inputUrl } = request.userData;
 
     // Searching only if search was directly provided on input, for other Start URLs, we go directly to scrolling
     if (search && label === 'MASTER') {
@@ -90,13 +90,14 @@ exports.handleMaster = async (page, requestQueue, input, request) => {
 
     const maxRequested = (input.maxResults && input.maxResults > 0) ? +input.maxResults : 99999;
 
-    await utils.loadVideosUrls(requestQueue, page, maxRequested, ['MASTER', 'SEARCH'].includes(label), searchOrUrl);
+    await utils.loadVideosUrls(requestQueue, page, inputUrl, maxRequested, ['MASTER', 'SEARCH'].includes(label), searchOrUrl);
 };
 
 exports.handleDetail = async (page, request) => {
     const { titleXp, viewCountXp, uploadDateXp, likesXp, dislikesXp, channelXp, subscribersXp, descriptionXp, durationSlctr } = CONSTS.SELECTORS.VIDEO;
 
     log.info(`handling detail url ${request.url}`);
+    log.info(`userData ${JSON.stringify(request.userData)}`);
 
     const videoId = utils.getVideoId(request.url);
     log.debug(`got videoId as ${videoId}`);
@@ -116,7 +117,7 @@ exports.handleDetail = async (page, request) => {
     const uploadDateStr = await utils.getDataFromXpath(page, uploadDateXp, 'innerHTML')
         .catch((e) => handleErrorAndScreenshot(page, e, 'Getting-uploadDate-failed'));
     const uploadDateCleaned = uploadDateStr.replace('Premiered', '').trim();
-    const uploadDate = moment(uploadDateCleaned, 'MMM DD, YYYY').format();
+    const uploadDate = uploadDateCleaned; // moment(uploadDateCleaned, 'MMM DD, YYYY').format();
     log.debug(`got uploadDate as ${uploadDate}, uploadDateStr: ${uploadDateStr}, uploadDateCleaned: ${uploadDateCleaned}`);
 
     log.debug(`searching for likesCount at ${likesXp}`);
@@ -160,6 +161,7 @@ exports.handleDetail = async (page, request) => {
         dislikes: dislikesCount,
         channelName,
         channelUrl,
+        inputUrl: request.userData.inputUrl,
         numberOfSubscribers,
         duration: durationStr,
         details: description,
