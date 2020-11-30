@@ -17,7 +17,7 @@ exports.handleErrorAndScreenshot = async (page, e, errorName) => {
  * @param {number} maxRequested
  * @param {boolean} isSearchResultPage
  */
-exports.loadVideosUrls = async (requestQueue, page, maxRequested, isSearchResultPage, searchOrUrl) => {
+exports.loadVideosUrls = async (requestQueue, page, inputUrl, maxRequested, isSearchResultPage, searchOrUrl) => {
     const { youtubeVideosSection, youtubeVideosRenderer, url } = CONSTS.SELECTORS.SEARCH;
 
     log.debug('loadVideosUrls', { maxRequested });
@@ -49,7 +49,7 @@ exports.loadVideosUrls = async (requestQueue, page, maxRequested, isSearchResult
 
                     const rq = await requestQueue.addRequest({
                         url: await video.$eval(url, (el) => el.href),
-                        userData: { label: 'DETAIL' },
+                        userData: { label: 'DETAIL', inputUrl },
                     });
 
                     videosEnqueued++;
