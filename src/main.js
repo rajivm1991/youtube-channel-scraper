@@ -81,6 +81,7 @@ Apify.main(async () => {
         let req;
         // eslint-disable-next-line no-cond-assign
         while (req = await parseUrls.fetchNextRequest()) {
+            const inputUrl = req.url;
             // need to parse for requestsFromUrl first then categorize by path
             const label = utils.categorizeUrl(req.url);
             const pUrl = new URL(req.url);
@@ -94,7 +95,7 @@ Apify.main(async () => {
                 url: req.url,
                 userData: {
                     label,
-                    inputUrl: req.url
+                    inputUrl
                 },
             });
         }
