@@ -1,20 +1,25 @@
 const moment = require('moment');
 const Apify = require('apify');
+// eslint-disable-next-line no-unused-vars
 const Puppeteer = require('puppeteer');
 
-const { log, sleep, puppeteer } = Apify.utils;
+const { log, sleep } = Apify.utils;
 
 const utils = require('./utility');
 const CONSTS = require('./consts');
 const { handleErrorAndScreenshot } = require('./utility');
 
 /**
- * @param {Puppeteer.Page} page
- * @param {Apify.RequestQueue} requestQueue
- * @param {any} input
- * @param {Apify.Request} request
+ * @param {{
+ *  page: Puppeteer.Page,
+ *  requestQueue: Apify.RequestQueue,
+ *  searchKeywords: string[],
+ *  maxResults: number,
+ *  postsFromDate: string,
+ *  request: Apify.Request,
+ * }} config
  */
-exports.handleMaster = async (page, requestQueue, input, request) => {
+exports.handleMaster = async ({ page, requestQueue, searchKeywords, maxResults, postsFromDate, request }) => {
     const { searchBox, toggleFilterMenu, filterBtnsXp } = CONSTS.SELECTORS.SEARCH;
     const { search, label, inputUrl } = request.userData;
 
@@ -35,7 +40,7 @@ exports.handleMaster = async (page, requestQueue, input, request) => {
 
         await Promise.allSettled([
             page.tap('#search-icon-legacy'),
-            page.waitForNavigation({ timeout: 5000 }),
+            page.waitForNavigation({ timeout: 15000 }),
         ]);
 
         // pause while page reloads
@@ -50,19 +55,28 @@ exports.handleMaster = async (page, requestQueue, input, request) => {
             // - click on filter menu to expand it
             // - click on specific filter button to add the filter
             log.info(`[${search}]: Setting filters...`);
-            const filtersToAdd = utils.getYoutubeDateFilters(input.postsFromDate);
+            const filtersToAdd = utils.getYoutubeDateFilters(postsFromDate);
+
             for (const filterLabel of filtersToAdd) {
+                log.debug('Opening filter menu', { filterLabel });
                 await page.tap(toggleFilterMenu);
 
                 // wait for filter panel to show
                 await page.waitForXPath(filterBtnsXp, { visible: true });
 
                 const targetFilterXp = `${filterBtnsXp}[text()='${filterLabel}']`;
-                await utils.moveMouseToElemXp(page, targetFilterXp, CONSTS.MOUSE_STEPS, 'Filter button');
+                const filterBtn = await page.$x(targetFilterXp);
+
+                log.debug('Setting filter', { filterLabel });
 
                 await Promise.all([
-                    utils.clickHoveredElem(page, targetFilterXp),
-                    page.waitForNavigation({ waitUntil: ['domcontentloaded'] }),
+                    filterBtn[0].click(),
+                    Promise.race([
+                        // this is for actual navigation, usually sp= is added to the url
+                        page.waitForNavigation({ waitUntil: ['domcontentloaded'], timeout: 15000 }).catch(() => null),
+                        // this is for the sorting and/or some combinations
+                        page.waitForResponse((response) => response.url().includes('/search'), { timeout: 15000 }).catch(() => null),
+                    ]),
                 ]);
             }
         }
@@ -81,20 +95,20 @@ exports.handleMaster = async (page, requestQueue, input, request) => {
 
     // keep scrolling until no more videos or max limit reached
     if (queuedVideos.length === 0) {
-        if (input.searchKeywords) {
-            throw `[${searchOrUrl}]: Error: The keywords '${input.searchKeywords} returned no youtube videos, retrying...`;
+        if (searchKeywords) {
+            throw `[${searchOrUrl}]: Error: The keywords '${searchKeywords} returned no youtube videos, retrying...`;
         }
         throw `[${searchOrUrl}]: Error: No videos found`;
     }
 
     log.info(`[${searchOrUrl}]: Starting infinite scrolling downwards to load all the videos...`);
 
-    const maxRequested = (input.maxResults && input.maxResults > 0) ? +input.maxResults : 99999;
+    const maxRequested = (maxResults && maxResults > 0) ? +maxResults : 99999;
 
     await utils.loadVideosUrls(requestQueue, page, inputUrl, maxRequested, ['MASTER', 'SEARCH'].includes(label), searchOrUrl);
 };
 
-exports.handleDetail = async (page, request) => {
+exports.handleDetail = async (page, request, extendOutputFunction) => {
     const { titleXp, viewCountXp, uploadDateXp, likesXp, dislikesXp, channelXp, subscribersXp, descriptionXp, durationSlctr } = CONSTS.SELECTORS.VIDEO;
 
     log.info(`handling detail url ${request.url}`);
@@ -151,8 +165,9 @@ exports.handleDetail = async (page, request) => {
     log.debug(`got videoDuration as ${durationStr}`);
 
     const description = await utils.getDataFromXpath(page, descriptionXp, 'innerHTML');
+    const text = await utils.getDataFromXpath(page, descriptionXp, 'innerText');
 
-    await Apify.pushData({
+    await extendOutputFunction({
         title,
         id: videoId,
         url: request.url,
@@ -166,40 +181,6 @@ exports.handleDetail = async (page, request) => {
         numberOfSubscribers,
         duration: durationStr,
         details: description,
-    });
-};
-
-exports.hndlPptGoto = async ({ page, request }) => {
-    await puppeteer.blockRequests(page, {
-        urlPatterns: [
-            '.mp4',
-            '.webp',
-            '.jpeg',
-            '.jpg',
-            '.gif',
-            '.svg',
-            '.ico',
-            'google-analytics',
-            'doubleclick.net',
-            'googletagmanager',
-            '/videoplayback',
-            '/adview',
-            '/stats/ads',
-            '/stats/watchtime',
-            '/stats/qoe',
-            '/log_event',
-        ]
-    });
-    return page.goto(request.url, { waitUntil: 'domcontentloaded' });
-};
-
-exports.hndlPptLnch = (launchOpts) => {
-    return Apify.launchPuppeteer(launchOpts);
-};
-
-exports.hndlFaildReqs = async ({ request }) => {
-    Apify.utils.log.error(`Request ${request.url} failed too many times`);
-    await Apify.pushData({
-        '#debug': Apify.utils.createRequestDebugInfo(request),
-    });
+        text,
+    }, { page, request });
 };
